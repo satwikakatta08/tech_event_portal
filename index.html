@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventPortal | College Event Hub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <a href="#" class="logo">🎓 EventPortal</a>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#events">Explore Events</a>
+      <a href="#actions">Student Services</a>
+      <a href="login.html">Login</a>
+    </nav>
+    <a href="#events" class="nav-button">Get Started</a>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-content">
+        <span class="eyebrow">YOUR CAMPUS. YOUR OPPORTUNITY.</span>
+        <h1>Discover. Apply.<br>Participate. <span>Excel.</span></h1>
+        <p>
+          Discover technical events across colleges, request
+          participation permission, and keep track of your achievements
+          in one place.
+        </p>
+        <div class="hero-buttons">
+          <a href="#events" class="btn primary">Explore Events →</a>
+          <a href="#actions" class="btn secondary">Student Services</a>
+        </div>
+        <div class="hero-note">🚀 Hackathons · Workshops · Tech Fests · Conferences</div>
+      </div>
+      <div class="hero-art">
+        <div class="art-icon">💻</div>
+        <div class="art-icon second">🏆</div>
+        <div class="art-icon third">🎓</div>
+        <div class="art-circle">
+          <span>🌐</span>
+          <h3>One portal.</h3>
+          <p>Opportunities everywhere.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="actions">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">QUICK ACCESS</span>
+          <h2>What would you like to do?</h2>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <a href="#events" class="action-card">
+          <div class="action-icon purple">🔎</div>
+          <h3>Explore Events</h3>
+          <p>Find events at your college and other institutions.</p>
+          <span>Browse events →</span>
+        </a>
+        <button class="action-card action-button" data-action="permission">
+          <div class="action-icon green">📝</div>
+          <h3>Apply for Permission</h3>
+          <p>Prepare a request to attend an external college event.</p>
+          <span>Start request →</span>
+        </button>
+        <button class="action-card action-button" data-action="applications">
+          <div class="action-icon blue">📋</div>
+          <h3>My Applications</h3>
+          <p>Keep track of your participation permission requests.</p>
+          <span>View applications →</span>
+        </button>
+        <button class="action-card action-button" data-action="attendance">
+          <div class="action-icon orange">🏅</div>
+          <h3>My Attendance</h3>
+          <p>Track participation records and event certificates.</p>
+          <span>View records →</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="section events-section" id="events">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">FIND YOUR NEXT OPPORTUNITY</span>
+          <h2>Explore Technical Events</h2>
+          <p class="section-description">
+            Opportunities hosted by your college and institutions across India.
+          </p>
+        </div>
+        <span class="demo-label">DEMO EVENTS</span>
+      </div>
+
+      <div class="event-tools">
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="🔎 Search events, colleges or locations..."
+          aria-label="Search events"
+        >
+        <select id="categoryFilter" aria-label="Filter by category">
+          <option value="all">All categories</option>
+          <option value="Hackathon">Hackathons</option>
+          <option value="Workshop">Workshops</option>
+          <option value="Conference">Conferences</option>
+          <option value="Competition">Competitions</option>
+        </select>
+        <select id="modeFilter" aria-label="Filter by event mode">
+          <option value="all">All modes</option>
+          <option value="Online">Online</option>
+          <option value="Offline">Offline</option>
+        </select>
+      </div>
+
+      <div class="event-grid" id="eventGrid"></div>
+      <p class="empty-message" id="emptyMessage" hidden>
+        No matching events found. Try another search or filter.
+      </p>
+      <p class="demo-notice">
+        These are sample events for demonstration, not verified live listings.
+      </p>
+    </section>
+
+    <section class="cta">
+      <div>
+        <span class="eyebrow">YOUR NEXT BIG OPPORTUNITY</span>
+        <h2>Don't limit your learning to one campus.</h2>
+        <p>Explore, participate, learn new skills, and grow your network.</p>
+      </div>
+      <a href="#events" class="btn cta-button">Find an Event →</a>
+    </section>
+  </main>
+
+  <footer>
+    <a href="#home" class="logo">🎓 EventPortal</a>
+    <p>Discover opportunities. Make participation count.</p>
+    <p class="footer-small">Student project prototype · © 2026 EventPortal</p>
+  </footer>
+
+  <div class="modal" id="eventModal" aria-hidden="true">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal" aria-label="Close">×</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

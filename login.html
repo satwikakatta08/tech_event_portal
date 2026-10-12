@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | TechEvent Portal</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <main class="login-container">
+    <section class="login-card">
+      <div class="brand-icon">EP</div>
+
+      <h1>Welcome Back!</h1>
+      <p class="subtitle">Sign in to your Event Portal account</p>
+
+      <form id="loginForm">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Enter your email"
+          autocomplete="email"
+          required
+        >
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+          required
+        >
+
+        <label for="role">Login As</label>
+        <select id="role" required>
+          <option value="">Select your role</option>
+          <option value="student">Student</option>
+          <option value="proctor">Proctor / Faculty</option>
+        </select>
+
+        <button type="submit" class="login-btn">
+          Login
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <button type="button" id="googleLoginButton"
+              class="google-btn">
+        <span class="google-icon">G</span>
+        Continue with Google
+      </button>
+
+      <p id="message" class="message" role="status"
+         aria-live="polite"></p>
+
+      <p class="back-link">
+        <a href="index.html">← Back to Home</a>
+      </p>
+    </section>
+
+    <p class="footer-text">
+      Technical Event Participation Approval &amp; Attendance Portal
+    </p>
+  </main>
+
+  <script src="login.js"></script>
+</body>
+</html>

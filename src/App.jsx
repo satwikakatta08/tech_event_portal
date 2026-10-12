@@ -1,196 +1,321 @@
 
-import { useState } from 'react';
-import Papa from 'papaparse';
-import './App.css';
+import { useState } from "react";
+import * as XLSX from "xlsx";
+import "./App.css";
 
-function App() {
+export default function App() {
   const [students, setStudents] = useState([]);
-  const [threshold, setThreshold] = useState(75);
-  const [message, setMessage] = useState('');
+  const [error, setError] = useState("");
+  const [attendanceLimit, setAttendanceLimit] = useState(75);
+  const [cgpaLimit, setCgpaLimit] = useState(6);
 
-  function handleUpload(event) {
-    const file = event.target.files[0];
+  function handleFileUpload(event) {
+    const file = event.target.files?.[0];
     if (!file) return;
 
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const rows = result.data.map((row, index) => {
-          const rollNo = (row.rollNo || '').trim();
-          const total = Number(row.totalClasses);
-          const attended = Number(row.attendedClasses);
-          let error = '';
+    setError("");
+    setStudents([]);
 
-          if (!rollNo) error = 'Missing roll number';
-          else if (
-            row.totalClasses === '' ||
-            row.attendedClasses === '' ||
-            !Number.isInteger(total) ||
-            !Number.isInteger(attended) ||
-            total < 0 ||
-            attended < 0
-          ) error = 'Invalid class count';
-          else if (total === 0) error = 'Total classes must be above 0';
-          else if (attended > total) error = 'Attended exceeds total';
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const workbook = XLSX.read(e.target.result, {
+          type: "array",
+        });
+
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(sheet, {
+          defval: "",
+        });
+
+        if (!data.length) {
+          setError("Excel sheet is empty.");
+          return;
+        }
+
+        const normalized = (value) =>
+          String(value ?? "")
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+
+        const findColumn = (row, aliases) =>
+          Object.keys(row).find((key) =>
+            aliases.includes(normalized(key))
+          );
+
+        const firstRow = data[0];
+
+        const rollKey = findColumn(firstRow, [
+          "rollno", "rollnumber", "roll", "studentid",
+        ]);
+        const nameKey = findColumn(firstRow, [
+          "studentname", "name", "student",
+        ]);
+        const totalKey = findColumn(firstRow, [
+          "totalclasses", "totalclass", "total",
+        ]);
+        const attendedKey = findColumn(firstRow, [
+          "attendedclasses", "classesattended", "attended",
+        ]);
+        const percentageKey = findColumn(firstRow, [
+          "attendancepercentage", "attendancepercent",
+          "attendance", "attendancepct",
+        ]);
+        const cgpaKey = findColumn(firstRow, [
+          "cgpa", "cgp", "cumulativegradepointaverage",
+        ]);
+
+        if (!rollKey || !cgpaKey ||
+            (!percentageKey && (!totalKey || !attendedKey))) {
+          setError(
+            "Required columns missing. Add Roll No, CGPA, and either Attendance Percentage or Total Classes + Attended Classes."
+          );
+          return;
+        }
+
+        const seen = new Set();
+
+        const results = data.map((row, index) => {
+          const rollNo = String(row[rollKey] ?? "").trim();
+          const name = nameKey
+            ? String(row[nameKey] ?? "").trim()
+            : "Student";
+          const cgpa = Number(row[cgpaKey]);
+
+          const total = totalKey
+            ? Number(row[totalKey])
+            : NaN;
+          const attended = attendedKey
+            ? Number(row[attendedKey])
+            : NaN;
+
+          let attendance;
+
+          if (percentageKey) {
+            attendance = Number(row[percentageKey]);
+            // Excel percentage cells formatted as 85% may
+            // be read as 0.85. Convert to 85.
+            if (
+              typeof row[percentageKey] === "number" &&
+              row[percentageKey] > 0 &&
+              row[percentageKey] <= 1
+            ) {
+              attendance *= 100;
+            }
+          } else if (
+            Number.isFinite(total) &&
+            Number.isFinite(attended) &&
+            total > 0 &&
+            attended >= 0 &&
+            attended <= total
+          ) {
+            attendance = (attended / total) * 100;
+          } else {
+            attendance = NaN;
+          }
+
+          let reason = "";
+
+          if (!rollNo) {
+            reason = "Missing roll number";
+          } else if (seen.has(rollNo)) {
+            reason = "Duplicate roll number";
+          } else if (
+            !Number.isFinite(attendance) ||
+            attendance < 0 ||
+            attendance > 100
+          ) {
+            reason = "Invalid attendance data";
+          } else if (!Number.isFinite(cgpa) || cgpa < 0 || cgpa > 10) {
+            reason = "Invalid CGPA (expected 0–10)";
+          } else if (
+            totalKey &&
+            attendedKey &&
+            (!Number.isFinite(total) ||
+              !Number.isFinite(attended) ||
+              total <= 0 ||
+              attended < 0 ||
+              attended > total)
+          ) {
+            reason = "Invalid class counts";
+          }
+
+          if (rollNo) seen.add(rollNo);
+
+          let status = "Eligible";
+
+          if (reason) {
+            status = "Invalid Data";
+          } else if (
+            attendance < attendanceLimit &&
+            cgpa < cgpaLimit
+          ) {
+            status = "Both Low";
+          } else if (attendance < attendanceLimit) {
+            status = "Attendance Low";
+          } else if (cgpa < cgpaLimit) {
+            status = "CGPA Low";
+          }
 
           return {
-            id: index,
             rollNo,
-            total,
-            attended,
-            error,
-            percentage:
-              !error ? (attended / total) * 100 : null,
+            name,
+            attendance,
+            cgpa,
+            status,
+            reason,
+            rowNumber: index + 2,
           };
         });
 
-        const seen = new Set();
-        rows.forEach((row) => {
-          if (row.rollNo && seen.has(row.rollNo)) {
-            row.error = 'Duplicate roll number';
-            row.percentage = null;
-          }
-          if (row.rollNo) seen.add(row.rollNo);
-        });
+        setStudents(results);
+      } catch {
+        setError("Unable to read this file. Please upload a valid Excel file.");
+      }
+    };
 
-        setStudents(rows);
-        setMessage(`Processed ${rows.length} rows`);
-      },
-      error: () => setMessage('Could not read the CSV file'),
-    });
+    reader.onerror = () => setError("Unable to read the selected file.");
+    reader.readAsArrayBuffer(file);
   }
 
-  function exportCSV() {
-    const data = students.map((s) => ({
-      rollNo: s.rollNo,
-      totalClasses: s.total,
-      attendedClasses: s.attended,
-      percentage: s.percentage == null
-        ? 'Invalid'
-        : s.percentage.toFixed(2),
-      status: s.error
-        ? s.error
-        : s.percentage >= threshold
-          ? 'Eligible'
-          : 'Below Threshold',
+  function downloadReport() {
+    const rows = students.map((s) => ({
+      "Roll No": s.rollNo,
+      "Student Name": s.name,
+      "Attendance Percentage": Number.isFinite(s.attendance)
+        ? Number(s.attendance.toFixed(2))
+        : "",
+      CGPA: Number.isFinite(s.cgpa) ? s.cgpa : "",
+      Status: s.status,
+      Reason: s.reason,
     }));
 
-    const csv = Papa.unparse(data);
-    const url = URL.createObjectURL(
-      new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    );
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'attendance-results.csv';
-    link.click();
-    URL.revokeObjectURL(url);
+    const sheet = XLSX.utils.json_to_sheet(rows);
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, sheet, "Eligibility Report");
+    XLSX.writeFile(book, "eligibility-report.xlsx");
   }
 
-  const valid = students.filter((s) => !s.error);
-  const eligible = valid.filter(
-    (s) => s.percentage >= threshold
+  const eligibleCount = students.filter(
+    (s) => s.status === "Eligible"
   ).length;
 
   return (
-    <main className="container">
-      <header>
-        <p className="eyebrow">TECH EVENT PORTAL</p>
-        <h1>Attendance & Eligibility</h1>
-        <p>Upload student attendance and check eligibility.</p>
-      </header>
+    <main className="eligibility-app">
+      <h1>Student Eligibility Checker</h1>
+      <p>
+        Upload one Excel sheet to check attendance and CGPA eligibility.
+      </p>
 
-      <section className="panel">
-        <label htmlFor="csv">Upload attendance CSV</label>
-        <p className="hint">
-          Required columns: rollNo, totalClasses, attendedClasses
-        </p>
+      <section className="upload-panel">
+        <label htmlFor="excel-file">Choose student Excel file</label>
         <input
-          id="csv"
+          id="excel-file"
           type="file"
-          accept=".csv,text/csv"
-          onChange={handleUpload}
+          accept=".xlsx,.xls"
+          onChange={handleFileUpload}
         />
-
-        <label htmlFor="threshold">
-          Eligibility threshold: <strong>{threshold}%</strong>
-        </label>
-        <input
-          id="threshold"
-          type="range"
-          min="0"
-          max="100"
-          value={threshold}
-          onChange={(e) => setThreshold(Number(e.target.value))}
-        />
-
-        <button onClick={exportCSV} disabled={!students.length}>
-          Export results CSV
-        </button>
-        <p role="status">{message}</p>
+        <small>Supported files: .xlsx and .xls</small>
       </section>
 
-      {students.length > 0 && (
-        <>
-          <section className="stats">
-            <div className="stat">
-              <span>Total rows</span>
-              <strong>{students.length}</strong>
-            </div>
-            <div className="stat">
-              <span>Eligible</span>
-              <strong>{eligible}</strong>
-            </div>
-            <div className="stat">
-              <span>Invalid rows</span>
-              <strong>{students.length - valid.length}</strong>
-            </div>
-          </section>
+      <section className="rules-panel">
+        <label>
+          Minimum Attendance: <strong>{attendanceLimit}%</strong>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={attendanceLimit}
+            onChange={(e) =>
+              setAttendanceLimit(Number(e.target.value))
+            }
+          />
+        </label>
 
-          <section className="panel table-wrap">
-            <h2>Attendance results</h2>
+        <label>
+          Minimum CGPA: <strong>{cgpaLimit.toFixed(1)}</strong>
+          <input
+            type="range"
+            min="0"
+            max="10"
+            step="0.5"
+            value={cgpaLimit}
+            onChange={(e) => setCgpaLimit(Number(e.target.value))}
+          />
+        </label>
+      </section>
+
+      {error && <p className="error-message">{error}</p>}
+
+      {students.length > 0 && (
+        <section className="results-panel">
+          <div className="results-heading">
+            <div>
+              <h2>Eligibility Results</h2>
+              <p>
+                {students.length} students · {eligibleCount} eligible
+              </p>
+            </div>
+            <button onClick={downloadReport}>
+              Download Excel Report
+            </button>
+          </div>
+
+          <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>Roll No.</th>
-                  <th>Attended / Total</th>
-                  <th>Percentage</th>
+                  <th>Roll No</th>
+                  <th>Student Name</th>
+                  <th>Attendance</th>
+                  <th>CGPA</th>
                   <th>Status</th>
+                  <th>Reason</th>
                 </tr>
               </thead>
               <tbody>
-                {students.map((s) => {
-                  const status = s.error
-                    ? s.error
-                    : s.percentage >= threshold
-                      ? 'Eligible'
-                      : 'Below Threshold';
-
-                  return (
-                    <tr key={s.id}>
-                      <td>{s.rollNo || '—'}</td>
-                      <td>{String(s.attended)} / {String(s.total)}</td>
-                      <td>
-                        {s.percentage == null
-                          ? '—'
-                          : `${s.percentage.toFixed(2)}%`}
-                      </td>
-                      <td>
-                        <span className={s.error ? 'invalid' :
-                          status === 'Eligible' ? 'eligible' : 'below'}>
-                          {status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {students.map((s, index) => (
+                  <tr key={`${s.rollNo}-${index}`}>
+                    <td>{s.rollNo || "—"}</td>
+                    <td>{s.name}</td>
+                    <td>
+                      {Number.isFinite(s.attendance)
+                        ? `${s.attendance.toFixed(1)}%`
+                        : "—"}
+                    </td>
+                    <td>
+                      {Number.isFinite(s.cgpa) ? s.cgpa : "—"}
+                    </td>
+                    <td>
+                      <span
+                        className={
+                          s.status === "Eligible"
+                            ? "status-eligible"
+                            : s.status === "Invalid Data"
+                            ? "status-invalid"
+                            : "status-ineligible"
+                        }
+                      >
+                        {s.status}
+                      </span>
+                    </td>
+                    <td>{s.reason || s.status === "Eligible"
+                      ? s.reason || "Meets both requirements"
+                      : s.status === "Both Low"
+                      ? "Attendance and CGPA below minimum"
+                      : s.status === "Attendance Low"
+                      ? "Attendance below minimum"
+                      : "CGPA below minimum"}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-          </section>
-        </>
+          </div>
+        </section>
       )}
     </main>
   );
 }
-
-export default App;

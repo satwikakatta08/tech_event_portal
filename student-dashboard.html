@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventPortal | Student Dashboard</title>
+  <link rel="stylesheet" href="student-dashboard.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="index.html" class="brand">EventPortal<span>.</span></a>
+
+    <p class="nav-label">MENU</p>
+    <a href="#overview" class="nav-link active">▦ Dashboard</a>
+    <a href="#events" class="nav-link">◇ Explore Events</a>
+    <a href="#applications" class="nav-link">▤ My Applications</a>
+    <a href="#attendance" class="nav-link">✓ Attendance</a>
+
+    <div class="sidebar-bottom">
+      <a href="index.html" class="nav-link">← Back to Website</a>
+      <a href="login.html" class="nav-link">↪ Login Page</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    
+<header class="topbar">
+  <div>
+    <p class="eyebrow">STUDENT PORTAL</p>
+    <h1 id="overview">Student Dashboard</h1>
+  </div>
+
+  <div class="profile" id="studentProfile">
+    <img
+  id="studentPhoto"
+  class="avatar"
+  src="https://placehold.co/48x48/eaf2ff/2563eb?text=S"
+  alt="Student profile"
+>
+
+    <div>
+      <strong id="studentName">Student User</strong>
+      <p id="studentEmail">Student</p>
+    </div>
+  </div>
+</header>
+
+
+    <section class="welcome">
+      <div>
+        <p class="eyebrow light">YOUR NEXT OPPORTUNITY STARTS HERE</p>
+        <h2>Welcome back, Student! 👋</h2>
+        <p>Discover events, request permission, and track your progress.</p>
+      </div>
+      <a href="#events" class="primary-button">Explore Events →</a>
+    </section>
+
+    <section class="stats">
+      <article class="stat-card">
+        <span class="stat-icon blue">◇</span>
+        <p>Available Events</p>
+        <h2 id="eventCount">0</h2>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon orange">◷</span>
+        <p>Pending Requests</p>
+        <h2 id="pendingCount">0</h2>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon green">✓</span>
+        <p>Approved Requests</p>
+        <h2 id="approvedCount">0</h2>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon purple">▤</span>
+        <p>Attendance Submitted</p>
+        <h2 id="attendanceCount">0</h2>
+      </article>
+    </section>
+
+    <section class="panel" id="events">
+      <div class="section-heading">
+        <div>
+          <h2>Explore Technical Events</h2>
+          <p>Find opportunities to learn and participate.</p>
+        </div>
+        <input id="searchInput" type="search"
+          placeholder="Search events..." aria-label="Search events">
+      </div>
+
+      <div class="filters">
+        <select id="categoryFilter" aria-label="Filter by category">
+          <option value="all">All Categories</option>
+          <option value="Hackathon">Hackathon</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Conference">Conference</option>
+        </select>
+
+        <select id="modeFilter" aria-label="Filter by mode">
+          <option value="all">All Modes</option>
+          <option value="Online">Online</option>
+          <option value="Offline">Offline</option>
+        </select>
+      </div>
+
+      <div id="eventList" class="event-grid"></div>
+    </section>
+
+    <section class="panel" id="applications">
+      <div class="section-heading">
+        <div>
+          <h2>My Applications</h2>
+          <p>Track your event permission requests.</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Category</th>
+              <th>Request Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="applicationList"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="attendance">
+      <div class="section-heading">
+        <div>
+          <h2>Attendance Tracking</h2>
+          <p>Submit your attendance proof for approved events.</p>
+        </div>
+      </div>
+      <div id="attendanceList" class="attendance-list"></div>
+    </section>
+
+    <footer>© 2026 EventPortal · Student Participation Portal</footer>
+  </main>
+
+  <script src="student-dashboard.js"></script>
+</body>
+</html>

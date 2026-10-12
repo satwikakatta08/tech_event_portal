@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventPortal | Proctor Dashboard</title>
+  <link rel="stylesheet" href="proctor-dashboard.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="index.html" class="brand">EventPortal<span>.</span></a>
+    <p class="nav-label">FACULTY MENU</p>
+    <a href="#overview" class="nav-link active">Dashboard</a>
+    <a href="#requests" class="nav-link">Permission Requests</a>
+    <a href="#attendance" class="nav-link">Attendance Review</a>
+    <div class="sidebar-bottom">
+      <a href="index.html" class="nav-link">Back to Website</a>
+      <a href="login.html" class="nav-link">Login Page</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">FACULTY PORTAL</p>
+        <h1 id="overview">Proctor Dashboard</h1>
+        <p class="muted">Review requests and monitor participation.</p>
+      </div>
+      <div class="profile">
+        <div class="avatar">P</div>
+        <div>
+          <strong>Faculty User</strong>
+          <p>Proctor</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="welcome">
+      <div>
+        <p class="eyebrow light">EVENT PARTICIPATION MANAGEMENT</p>
+        <h2>Welcome, Faculty! 👋</h2>
+        <p>Review student applications and keep event participation organized.</p>
+      </div>
+    </section>
+
+    <section class="stats">
+      <article class="stat-card">
+        <span class="stat-icon blue">▤</span>
+        <p>Total Requests</p>
+        <h2 id="totalCount">0</h2>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon orange">◷</span>
+        <p>Pending Review</p>
+        <h2 id="pendingCount">0</h2>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon green">✓</span>
+        <p>Approved</p>
+        <h2 id="approvedCount">0</h2>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon red">×</span>
+        <p>Rejected</p>
+        <h2 id="rejectedCount">0</h2>
+      </article>
+    </section>
+
+    <section class="panel" id="requests">
+      <div class="section-heading">
+        <div>
+          <h2>Permission Requests</h2>
+          <p>Review event details before making a decision.</p>
+        </div>
+        <input id="searchInput" type="search"
+          placeholder="Search student or event..."
+          aria-label="Search student or event">
+      </div>
+
+      <div class="filters">
+        <select id="statusFilter" aria-label="Filter by status">
+          <option value="All">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Mode</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="requestList"></tbody>
+        </table>
+      </div>
+      <p id="feedback" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel" id="attendance">
+      <div class="section-heading">
+        <div>
+          <h2>Attendance Review</h2>
+          <p>Review attendance proof marked as submitted in this demo.</p>
+        </div>
+      </div>
+      <div id="attendanceList" class="attendance-list"></div>
+    </section>
+
+    <footer>© 2026 EventPortal · Faculty Participation Portal</footer>
+  </main>
+
+  <script src="proctor-dashboard.js"></script>
+</body>
+</html>
